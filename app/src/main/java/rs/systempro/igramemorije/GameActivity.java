@@ -8,6 +8,7 @@ import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.GridLayout;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 public class GameActivity extends AppCompatActivity {
@@ -39,14 +40,20 @@ public class GameActivity extends AppCompatActivity {
 
         glMreza.setColumnCount(w);
 
+
+        int rootH = findViewById(R.id.rlRoot).getHeight();
+        int rootW = findViewById(R.id.rlRoot).getWidth();
+
+        Toast.makeText(this, rootH + " - "+rootW, Toast.LENGTH_SHORT).show();
+
         for(int i=0;i<h*w;i++){
             Button b = new Button(this);
 
             b.setText("Dugme "+ i);
             glMreza.addView(b);
             GridLayout.LayoutParams param =new GridLayout.LayoutParams();
-            param.height = GridLayout.LayoutParams.WRAP_CONTENT;
-            param.setGravity(Gravity.FILL);
+            param.height = rootH/h;
+            param.width = rootW/w;
             b.setLayoutParams(param);
         }
     }
