@@ -12,18 +12,24 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.GridLayout;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class GameActivity extends AppCompatActivity {
 
-    int h;
-    int w;
+    int solved;
     ArrayList<Drawable> images;
+    ImageButton firstOpened;
+    ImageButton secondOpened;
+    int numOfOpened;
+    int time;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,8 +37,11 @@ public class GameActivity extends AppCompatActivity {
         setContentView(R.layout.activity_game);
 
         Intent myIntent = getIntent();
-        h = myIntent.getIntExtra("height", 4);
-        w = myIntent.getIntExtra("width", 3);
+        final int h = myIntent.getIntExtra("height", 4);
+        final int w = myIntent.getIntExtra("width", 3);
+
+        solved=0;
+        numOfOpened=0;
 
         images= new ArrayList<>();
         for(int i=0;i<(h*w)/2;i++){
@@ -51,6 +60,14 @@ public class GameActivity extends AppCompatActivity {
         final GridLayout glMreza = (GridLayout) findViewById(R.id.glMreza);
         glMreza.setColumnCount(w);
 
+        time=0;
+        Timer t = new Timer();
+        t.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                time++;
+            }
+        },1000,1000);
         rlRoot.post(new Runnable() {
             @Override
             public void run() {
@@ -60,10 +77,14 @@ public class GameActivity extends AppCompatActivity {
                 Toast.makeText(getApplicationContext(), rootH + " - " + rootW, Toast.LENGTH_SHORT).show();
 
                 for (int i = 0; i < h * w; i++) {
-                    ImageButton b = new ImageButton(getApplicationContext());
+                    final ImageButton b = new ImageButton(getApplicationContext());
 
+                    final Drawable image = images.get(i);
                     b.setBackgroundColor(Color.RED);
-                    b.setImageDrawable(images.get(i));
+//                    b.setImageDrawable(images.get(i));
+                    b.setScaleType(ImageView.ScaleType.FIT_CENTER);
+                    b.setPadding(0,0,0,0);
+
                     glMreza.addView(b);
                     GridLayout.LayoutParams param = new GridLayout.LayoutParams();
 
@@ -76,6 +97,35 @@ public class GameActivity extends AppCompatActivity {
                     }
                     param.setMargins(10,10,10,10);
                     b.setLayoutParams(param);
+
+                    b.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+//                            b.setImageDrawable(image);
+
+
+                            if(numOfOpened==2){
+                                numOfOpened=1;
+                                firstOpened.setImageDrawable(null);
+                                secondOpened.setImageDrawable(null);
+                                firstOpened = b;
+                                b.setImageDrawable(image);
+                            }else if(numOfOpened==1){
+                                b.setImageDrawable(image);
+                                numOfOpened++;
+                                secondOpened=b;
+                                if(firstOpened.getDrawable().getConstantState().equals(secondOpened.getDrawable().getConstantState())) {
+                                    numOfOpened=0;
+                                    firstOpened.setClickable(false);
+                                    secondOpened.setClickable(false);
+                                }
+                            }else{
+                                b.setImageDrawable(image);
+                                numOfOpened=1;
+                                firstOpened = b;
+                            }
+                        }
+                    });
                 }
             }
         });
