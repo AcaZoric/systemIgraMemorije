@@ -2,19 +2,16 @@ package rs.systempro.igramemorije;
 
 import android.content.Intent;
 import android.graphics.Color;
-import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.Gravity;
 import android.view.View;
-import android.widget.Button;
 import android.widget.GridLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -30,6 +27,7 @@ public class GameActivity extends AppCompatActivity {
     ImageButton secondOpened;
     int numOfOpened;
     int time;
+    Timer timer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,11 +59,18 @@ public class GameActivity extends AppCompatActivity {
         glMreza.setColumnCount(w);
 
         time=0;
-        Timer t = new Timer();
-        t.schedule(new TimerTask() {
+        timer = new Timer();
+        final TextView tvTime = (TextView)findViewById(R.id.tvTime);
+        timer.schedule(new TimerTask() {
             @Override
             public void run() {
                 time++;
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        tvTime.setText(time+"s");
+                    }
+                });
             }
         },1000,1000);
         rlRoot.post(new Runnable() {
@@ -118,6 +123,13 @@ public class GameActivity extends AppCompatActivity {
                                     numOfOpened=0;
                                     firstOpened.setClickable(false);
                                     secondOpened.setClickable(false);
+                                    if(++solved == h*w/2){
+                                        timer.cancel();
+                                        finish();
+                                        Intent intent = new Intent(getApplicationContext(), GameOverActivity.class);
+                                        intent.putExtra("time", time);
+                                        startActivity(intent);
+                                    }
                                 }
                             }else{
                                 b.setImageDrawable(image);
